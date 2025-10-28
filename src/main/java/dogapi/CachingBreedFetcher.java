@@ -16,35 +16,30 @@ public class CachingBreedFetcher implements BreedFetcher {
     private final BreedFetcher underlyingFetcher;
     private final Map<String, List<String>> cache = new HashMap<>();
     private int callsMade = 0;
+
     public CachingBreedFetcher(BreedFetcher fetcher) {
-            this.underlyingFetcher = fetcher;
+        this.underlyingFetcher = fetcher;
     }
 
     @Override
-    public List<String> getSubBreeds(String breed) {
-        if (cache.containsKey(breed.toLowerCase())) {
-            return cache.get(breed.toLowerCase());
+    public List<String> getSubBreeds(String breed) throws BreedNotFoundException {
+        String key = breed.toLowerCase();
+
+        // 命中缓存 → 不调用底层，不增加 callsMade
+        if (cache.containsKey(key)) {
+            return cache.get(key);
         }
 
-        try {
-            // 调用底层 fetcher
-            List<String> result = underlyingFetcher.getSubBreeds(breed);
-            callsMade++;
+        // 没有缓存 → 调用底层
+        callsMade++;
+        List<String> result = underlyingFetcher.getSubBreeds(breed);
 
-            // 存入缓存（仅成功结果缓存）
-            cache.put(breed.toLowerCase(), result);
-            return result;
-
-        } catch (BreedNotFoundException e) {
-            // 不缓存失败结果
-            callsMade++;
-            throw e;
-        }
+        // 只有成功的才缓存
+        cache.put(key, result);
+        return result;
     }
 
     public int getCallsMade() {
         return callsMade;
     }
-    }
-
-
+}
