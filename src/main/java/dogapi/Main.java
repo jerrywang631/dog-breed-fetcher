@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) {
         String breed = "hound";
         BreedFetcher breedFetcher = new CachingBreedFetcher(new BreedFetcherForLocalTesting());
+
         int result = getNumberOfSubBreeds(breed, breedFetcher);
         System.out.println(breed + " has " + result + " sub breeds");
 
@@ -24,15 +25,14 @@ public class Main {
      * returned by the fetcher
      */
     public static int getNumberOfSubBreeds(String breed, BreedFetcher breedFetcher) {
-        // TODO Task 3 implement this code so that it is entirely consistent with its provided documentation.
-        // return statement included so that the starter code can compile and run.
         try {
-            List<String> newbreed = breedFetcher.getSubBreeds(breed);
-            if (newbreed.isEmpty()) {
+            List<String> subs = breedFetcher.getSubBreeds(breed);
+            if (subs == null) {
                 return 0;
             }
-            return newbreed.size();
-        }catch (BreedFetcher.BreedNotFoundException e) {
+            return subs.size();
+        } catch (BreedFetcher.BreedNotFoundException e) {
+            // 如果这个品种不存在，或者底层抛出来找不到
             return 0;
         }
     }
